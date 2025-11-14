@@ -6,7 +6,9 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active', 'created_at')
     search_fields = ('name',)
     list_filter = ('is_active',)
-    exclude = ('slug', 'description', 'image')
+    #readonly_fields = ('slug',)
+    exclude = ('slug','description', 'image')
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock', 'is_available', 'featured')
@@ -34,4 +36,4 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ('order_number', 'user', 'status', 'total_amount', 'created_at')
     search_fields = ('order_number', 'user__username')
     list_filter = ('status', 'created_at')
-    inlines = [OrderItemInline]
+    #inlines = [OrderItemInline]

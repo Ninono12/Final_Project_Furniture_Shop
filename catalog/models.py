@@ -1,5 +1,8 @@
 from django.db import models
 from django.conf import settings
+from django.utils.text import slugify
+from django.db import models
+from django.contrib.auth.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -7,8 +10,20 @@ class Category(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)
+            slug = base_slug
+            num = 1
+            while Category.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{num}"
+                num += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     COLOR_CHOICES = [
@@ -31,7 +46,7 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    description = models.TextField()
+    description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     is_available = models.BooleanField(default=True)
@@ -47,6 +62,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -64,6 +80,7 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart of {self.user}"
 
+
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -71,6 +88,7 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -93,6 +111,8 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.order_number} - {self.user}"
+
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -101,3 +121,21 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
+class CustomUserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='catalog_profile'
+    )
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
