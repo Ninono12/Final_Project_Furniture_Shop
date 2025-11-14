@@ -6,7 +6,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active', 'created_at')
     search_fields = ('name',)
     list_filter = ('is_active',)
-    exclude = ('slug',)
+    exclude = ('slug', 'description', 'image')
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock', 'is_available', 'featured')
