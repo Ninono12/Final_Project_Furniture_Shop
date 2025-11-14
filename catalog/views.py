@@ -3,6 +3,9 @@ from .models import Category
 from .serializers import CategorySerializer
 from .models import Product
 from .serializers import ProductSerializer
+from rest_framework import viewsets, filters
+
+
 
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -33,3 +36,9 @@ class ProductListView(generics.ListAPIView):
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+class ProductViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['color', 'material']
