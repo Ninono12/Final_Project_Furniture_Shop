@@ -6,19 +6,20 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active', 'created_at')
     search_fields = ('name',)
     list_filter = ('is_active',)
-    prepopulated_fields = {'slug': ('name',)}
-
+    exclude = ('slug',)  # Slug ველის გაბეჭება ფორმიდან
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock', 'is_available', 'featured')
     search_fields = ('name',)
-    list_filter = ('category', 'color', 'material')
+    list_filter = ('category', 'color', 'material', 'is_available', 'featured')
     list_editable = ('price', 'stock')
+    prepopulated_fields = {'slug': ('name',)}  # Product-ში slug ავტომატურად გენერირდება
 
 class CartItemInline(admin.TabularInline):
     model = CartItem
     extra = 0
+
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'updated_at')
@@ -35,4 +36,3 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('order_number', 'user__username')
     list_filter = ('status', 'created_at')
     inlines = [OrderItemInline]
-
