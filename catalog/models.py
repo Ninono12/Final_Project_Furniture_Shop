@@ -1,4 +1,3 @@
-from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 from django.db import models
@@ -102,12 +101,18 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order_number = models.CharField(max_length=20, unique=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shipping_address = models.TextField()
     phone = models.CharField(max_length=20)
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            total = sum(item.price * item.quantity for item in self.items.all())
+            self.total_amount = total
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Order {self.order_number} - {self.user}"
