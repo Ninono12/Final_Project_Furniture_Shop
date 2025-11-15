@@ -1,7 +1,8 @@
+from typing import Any
+
 from django.conf import settings
 from django.utils.text import slugify
 from django.db import models
-from typing import Any
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
