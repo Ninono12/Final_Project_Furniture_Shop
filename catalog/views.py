@@ -1,13 +1,18 @@
-from rest_framework import generics, viewsets, filters, status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .models import Category, Product, Cart, CartItem, Order, OrderItem, CustomUserProfile
-from .serializers import CategorySerializer, ProductSerializer
+from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework import viewsets, filters, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Category, Order, OrderItem, CustomUserProfile
+from .serializers import CategorySerializer, ProductSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Cart, CartItem, Product
+from rest_framework import generics, permissions
+from .models import Order
+from .serializers import OrderSerializer
+
 
 
 class CategoryListView(generics.ListAPIView):
@@ -126,6 +131,14 @@ class CartView(APIView):
         serializer = CartItemSerializer(items, many=True)
         return Response(serializer.data)
 
+class CartView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CartSerializer
+
+    def get_object(self):
+        cart, _ = Cart.objects.get_or_create(user=self.request.user)
+        return cart
+
 class CartAddItemSerializer(serializers.Serializer):
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField(default=1)
@@ -172,13 +185,12 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'order_number', 'status', 'total_amount', 'shipping_address', 'phone', 'notes', 'created_at', 'items']
 
-class OrderListView(APIView):
-    permission_classes = [IsAuthenticated]
+class OrderListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = OrderSerializer
 
-    def get(self, request):
-        orders = Order.objects.filter(user=request.user)
-        serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
 
 class OrderDetailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -218,3 +230,59 @@ class OrderCreateView(APIView):
             )
         cart.items.all().delete()
         return Response({'detail': 'Order created', 'order_number': order.order_number})
+
+    class CartView(generics.RetrieveAPIView):
+        serializer_class = CartSerializer
+        permission_classes = [permissions.IsAuthenticated]
+
+        def get_object(self):
+            cart, created = Cart.objects.get_or_create(user=self.request.user)
+            return cart
+
+    class AddToCartView(APIView):
+        permission_classes = [permissions.IsAuthenticated]
+
+        def post(self, request):
+            product_id = request.data.get('product_id')
+            quantity = int(request.data.get('quantity', 1))
+            product = Product.objects.get(id=product_id)
+            cart, _ = Cart.objects.get_or_create(user=request.user)
+            cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+            if not created:
+                cart_item.quantity += quantity
+            else:
+                cart_item.quantity = quantity
+            cart_item.save()
+            return Response({'status': 'product added'})
+
+    class RemoveFromCartView(APIView):
+        permission_classes = [permissions.IsAuthenticated]
+
+        def post(self, request):
+            product_id = request.data.get('product_id')
+            cart = Cart.objects.get(user=request.user)
+            cart_item = CartItem.objects.filter(cart=cart, product_id=product_id).first()
+            if cart_item:
+                cart_item.delete()
+                return Response({'status': 'product removed'})
+            return Response({'status': 'product not found'}, status=404)
+
+    class OrderListView(generics.ListAPIView):
+            serializer_class = OrderSerializer
+            permission_classes = [permissions.IsAuthenticated]
+
+            def get_queryset(self):
+                return Order.objects.filter(user=self.request.user)
+
+    class OrderDetailView(generics.RetrieveAPIView):
+        permission_classes = [permissions.IsAuthenticated]
+        serializer_class = OrderSerializer
+        queryset = Order.objects.all()
+
+    class OrderCreateView(generics.CreateAPIView):
+        permission_classes = [permissions.IsAuthenticated]
+        serializer_class = OrderSerializer
+
+        def perform_create(self, serializer):
+            serializer.save(user=self.request.user)
+
