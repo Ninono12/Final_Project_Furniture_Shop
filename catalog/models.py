@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils.text import slugify
 from django.db import models
+from typing import Any
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -65,6 +66,10 @@ class Product(models.Model):
 class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(args, kwargs)
+        self.items = None
 
     def get_total_price(self):
         return sum(item.product.price * item.quantity for item in self.items.all())
