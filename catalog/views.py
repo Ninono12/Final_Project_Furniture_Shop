@@ -1,5 +1,5 @@
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets, filters, status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ from .serializers import (
     CartSerializer, CartItemSerializer,
     OrderSerializer, OrderItemSerializer
 )
+from .tasks import send_order_confirmation_email
 
 User = get_user_model()
 
@@ -95,10 +96,12 @@ class CartAddItemView(APIView):
         product = get_object_or_404(Product, pk=product_id)
         item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         if not created:
-            item.quantity = item.quantity + quantity
+            item.quantity += quantity
         else:
             item.quantity = quantity
         item.save()
+        # clear cached items after update
+        cart.items_cache = None
         return Response({'detail': 'Item added/updated in cart'})
 
 class CartRemoveItemView(APIView):
@@ -108,6 +111,8 @@ class CartRemoveItemView(APIView):
         product_id = request.data.get('product_id')
         cart = get_object_or_404(Cart, user=request.user)
         CartItem.objects.filter(cart=cart, product_id=product_id).delete()
+        # clear cached items after deletion
+        cart.items_cache = None
         return Response({'detail': 'Item removed from cart'})
 
 class OrderListView(generics.ListAPIView):
@@ -132,7 +137,7 @@ class OrderCreateView(APIView):
 
         cart = get_object_or_404(Cart, user=request.user)
         if not cart.items.exists():
-            return Response({'detail': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Cart is empty'}, status=400)
 
         order = Order.objects.create(
             user=request.user,
@@ -149,8 +154,12 @@ class OrderCreateView(APIView):
                 price=item.product.price
             )
 
-        order.save()
-
         cart.items.all().delete()
 
-        return Response({'detail': 'Order created', 'order_number': order.order_number}, status=status.HTTP_201_CREATED)
+
+        send_order_confirmation_email.delay(order.id)
+
+        return Response({
+            'detail': 'Order created',
+            'order_number': order.order_number
+        }, status=201)

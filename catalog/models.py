@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 from decimal import Decimal
+from typing import Any
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -87,20 +88,28 @@ class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.items_cache = None
+
+    @property
+    def items(self):
+        if self.items_cache is None:
+            self.items_cache = self.cartitem_set.all()
+        return self.items_cache
+
     def get_total_price(self):
-        items = self.items.all()
-        total = sum((item.product.price or Decimal('0.00')) * item.quantity for item in items)
+        total = sum((item.product.price or Decimal('0.00')) * item.quantity for item in self.items)
         return total
 
     def get_total_items(self):
-        return self.items.all()
+        return self.items
 
     def get_total_items_count(self):
-        return sum(item.quantity for item in self.items.all())
+        return sum(item.quantity for item in self.items)
 
     def __str__(self):
         return f"Cart of {self.user}"
-
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
@@ -112,6 +121,11 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
+
+def _generate_order_number():
+    count = Order.objects.count() + 1
+    return f'ORD{count:05}'
 
 
 class Order(models.Model):
@@ -136,13 +150,14 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def _generate_order_number(self):
-        count = Order.objects.count() + 1
-        return f'ORD{count:05}'
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(args, kwargs)
+        self.items = None
+        self.id = None
 
     def save(self, *args, **kwargs):
         if not self.order_number:
-            self.order_number = self._generate_order_number()
+            self.order_number = _generate_order_number()
         # first save to ensure pk for related items
         super().save(*args, **kwargs)
 
