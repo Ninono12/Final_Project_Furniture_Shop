@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Category, Product, Cart, CartItem, Order, OrderItem, CustomUserProfile
+from .models import Category, Product, Cart, CartItem, Order, OrderItem
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,16 +16,16 @@ class ProductSerializer(serializers.ModelSerializer):
             'main_image', 'image2', 'image3', 'image4',
             'created_at', 'updated_at'
         ]
-class CustomUserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUserProfile
-        fields = ['first_name', 'last_name', 'phone', 'city', 'birth_date']
+#class CustomUserProfileSerializer(serializers.ModelSerializer):
+    #class Meta:
+        #model = CustomUserProfile
+       # fields = ['first_name', 'last_name', 'phone', 'city', 'birth_date']
 
-class UserSerializer(serializers.ModelSerializer):
-    profile = CustomUserProfileSerializer(source='catalog_profile', read_only=True)
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'profile']
+#class UserSerializer(serializers.ModelSerializer):
+    #profile = CustomUserProfileSerializer(source='catalog_profile', read_only=True)
+    #class Meta:
+        #model = User
+        #fields = ['id', 'username', 'email', 'profile']
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)

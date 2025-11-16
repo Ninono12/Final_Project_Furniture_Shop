@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from .models import Category, Product, Cart, CartItem, Order, OrderItem, CustomUserProfile
+from .models import Category, Product, Cart, CartItem, Order, OrderItem
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -38,29 +38,29 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at')
     inlines = [OrderItemInline]
 
-class CustomUserProfileInline(admin.StackedInline):
-    model = CustomUserProfile
-    can_delete = False
-    verbose_name_plural = 'Profile'
+#class CustomUserProfileInline(admin.StackedInline):
+    #model = CustomUserProfile
+    #can_delete = False
+    #verbose_name_plural = 'Profile'
 
-class CityFilter(admin.SimpleListFilter):
-    title = 'city'
-    parameter_name = 'city'
+#class CityFilter(admin.SimpleListFilter):
+    #title = 'city'
+    #parameter_name = 'city'
 
-    def lookups(self, request, model_admin):
-        cities = set(CustomUserProfile.objects.values_list('city', flat=True))
-        return [(c, c) for c in cities if c]
+    #def lookups(self, request, model_admin):
+        #cities = set(CustomUserProfile.objects.values_list('city', flat=True))
+        #return [(c, c) for c in cities if c]
 
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(custom_profile__city=self.value())
-        return queryset
+    #def queryset(self, request, queryset):
+        #if self.value():
+            #return queryset.filter(custom_profile__city=self.value())
+        #return queryset
 
-class CustomUserAdmin(admin.ModelAdmin):
-    inlines = (CustomUserProfileInline,)
-    list_display = ('username', 'email', 'get_full_name', 'is_staff')
-    search_fields = ('username', 'email', 'custom_profile__first_name', 'custom_profile__last_name', 'custom_profile__phone')
-    list_filter = (CityFilter,)
+#class CustomUserAdmin(admin.ModelAdmin):
+    #inlines = (CustomUserProfileInline,)
+    #list_display = ('username', 'email', 'get_full_name', 'is_staff')
+    #search_fields = ('username', 'email', 'custom_profile__first_name', 'custom_profile__last_name', 'custom_profile__phone')
+    #list_filter = (CityFilter,)
 
     def get_full_name(self, obj):
         if hasattr(obj, 'custom_profile'):
@@ -69,4 +69,4 @@ class CustomUserAdmin(admin.ModelAdmin):
     get_full_name.short_description = 'Full Name'
 
 admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
+#admin.site.register(User, CustomUserAdmin)

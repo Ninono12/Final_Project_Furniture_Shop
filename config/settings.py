@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'catalog',
     'users',
+    'rest_framework_simplejwt'
 
 ]
 
