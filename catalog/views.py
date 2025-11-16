@@ -6,6 +6,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
+from rest_framework.serializers import ModelSerializer
+
+User = get_user_model()
 
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
 from .serializers import (
@@ -163,3 +167,18 @@ class OrderCreateView(APIView):
             'detail': 'Order created',
             'order_number': order.order_number
         }, status=201)
+
+class RegisterSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
+class RegisterAPIView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer

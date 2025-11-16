@@ -18,11 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from catalog.views import RegisterAPIView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('catalog.urls')),
     path('api/users/', include('users.urls')),
+    path('admin/', admin.site.urls),
+    path('api/register/', RegisterAPIView.as_view(), name='register'),
+    path('api/users/', include('rest_framework.urls')),
+    path('api/categories/', include('catalog.urls')),
+    path('api/products/', include('catalog.urls')),
 ]
 
 if settings.DEBUG:
