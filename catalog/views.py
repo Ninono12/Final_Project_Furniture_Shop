@@ -1,21 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, viewsets, filters, status, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import generics, viewsets, filters, status
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
 from .serializers import (
     CategorySerializer, ProductSerializer,
-    CartSerializer, CartItemSerializer,
-    OrderSerializer, OrderItemSerializer
+    CartSerializer, OrderSerializer
 )
 from .tasks import send_order_confirmation_email
 
