@@ -30,10 +30,10 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
     path('cart/', CartView.as_view(), name='cart'),
     path('cart/add/', CartAddItemView.as_view(), name='cart-add'),
     path('cart/remove/', CartRemoveItemView.as_view(), name='cart-remove'),
+    path('api/', include('catalog.urls')),
 ]
 
 if settings.DEBUG:

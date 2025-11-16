@@ -102,7 +102,6 @@ class CartAddItemView(APIView):
         else:
             item.quantity = quantity
         item.save()
-        # clear cached items after update
         cart.items_cache = None
         return Response({'detail': 'Item added/updated in cart'})
 

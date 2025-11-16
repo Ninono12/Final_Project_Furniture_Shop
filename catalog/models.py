@@ -158,10 +158,8 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         if not self.order_number:
             self.order_number = _generate_order_number()
-        # first save to ensure pk for related items
         super().save(*args, **kwargs)
 
-        # compute total if there are related items
         total = Decimal('0.00')
         items = getattr(self, 'items', None)
         if items is None:
@@ -169,7 +167,6 @@ class Order(models.Model):
         for item in items.all():
             total += (item.price or Decimal('0.00')) * item.quantity
 
-        # update total_amount if changed
         if self.total_amount != total:
             self.total_amount = total
             super().save(update_fields=['total_amount'])

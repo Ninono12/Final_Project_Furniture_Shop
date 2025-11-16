@@ -4,7 +4,8 @@ from .views import (
     CategoryListView, CategoryDetailView,
     ProductListView, ProductDetailView,
     CartView, CartAddItemView, CartRemoveItemView,
-    RegisterAPIView, RegisterView, LoginView, ProductViewSet
+    RegisterAPIView, RegisterView, LoginView, ProductViewSet,
+    OrderListView, OrderDetailView, OrderCreateView
 )
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
@@ -19,4 +20,7 @@ urlpatterns = [
     path('cart/remove/', CartRemoveItemView.as_view(), name='cart-remove'),
     path('register/', RegisterAPIView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
+    path('orders/', OrderListView.as_view(), name='order-list'),
+    path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
+    path('orders/create/', OrderCreateView.as_view(), name='order-create'),
 ]
