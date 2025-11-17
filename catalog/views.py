@@ -8,6 +8,8 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from users.serializers import RegisterSerializer
+
 User = get_user_model()
 
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
@@ -56,18 +58,18 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['color', 'material', 'name']
 
-class RegisterView(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
-        if not username or not password:
-            return Response({'detail': 'username and password required'}, status=status.HTTP_400_BAD_REQUEST)
-        if User.objects.filter(username=username).exists():
-            return Response({'detail': 'username taken'}, status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.create_user(username=username, email=email, password=password)
-        refresh = RefreshToken.for_user(user)
-        return Response({'refresh': str(refresh), 'access': str(refresh.access_token)}, status=status.HTTP_201_CREATED)
+#class RegisterView(APIView):
+    #def post(self, request):
+        #username = request.data.get('username')
+        #email = request.data.get('email')
+        #password = request.data.get('password')
+        #if not username or not password:
+            #return Response({'detail': 'username and password required'}, status=status.HTTP_400_BAD_REQUEST)
+        #if User.objects.filter(username=username).exists():
+            #return Response({'detail': 'username taken'}, status=status.HTTP_400_BAD_REQUEST)
+        #user = User.objects.create_user(username=username, email=email, password=password)
+        #refresh = RefreshToken.for_user(user)
+        #return Response({'refresh': str(refresh), 'access': str(refresh.access_token)}, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
     def post(self, request):
@@ -165,13 +167,13 @@ class OrderCreateView(APIView):
             'order_number': order.order_number
         }, status=201)
 
-class RegisterSerializer(ModelSerializer):
-    class Meta:
-        model = User
+#class RegisterSerializer(ModelSerializer):
+    #class Meta:
+        #model = User
         fields = ('id', 'username', 'email', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data):
+    #def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
 

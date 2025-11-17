@@ -6,7 +6,8 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active', 'created_at')
     search_fields = ('name',)
     list_filter = ('is_active',)
-    prepopulated_fields = {'slug': ('name',)}
+    exclude = ('slug',)
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -14,7 +15,8 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('category', 'color', 'material', 'is_available', 'featured')
     list_editable = ('price', 'stock')
-    prepopulated_fields = {'slug': ('name',)}
+    exclude = ('slug',)
+
 
 class CartItemInline(admin.TabularInline):
     model = CartItem

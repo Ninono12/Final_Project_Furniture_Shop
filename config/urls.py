@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from catalog.views import RegisterAPIView, RegisterView, LoginView
+from catalog.views import RegisterAPIView, LoginView #RegisterView,
 from rest_framework_simplejwt.views import TokenRefreshView
 from catalog.views import CartView, CartAddItemView, CartRemoveItemView
 
@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/', include('catalog.urls')),
     path('api/users/', include('users.urls')),
     path('api/register/', RegisterAPIView.as_view(), name='register'),
-    path('api/register/', RegisterView.as_view(), name='register'),
+    #path('api/register/', RegisterView.as_view(), name='register'),
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('cart/', CartView.as_view(), name='cart'),

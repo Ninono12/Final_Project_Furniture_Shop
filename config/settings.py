@@ -1,11 +1,15 @@
 from pathlib import Path
+from decouple import config
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-l%ko0=_+gf0qfxv)91i@iz$nx%+7)895b1#+4a)6rm98-=o$k3'
+#SECRET_KEY = 'django-insecure-l%ko0=_+gf0quit)91i@iz$nx%+7)895b1#+4a)6rm98-=o$k3'
+#DEBUG = True
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-DEBUG = True
+
 
 ALLOWED_HOSTS = []
 
@@ -39,20 +43,20 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+#TEMPLATES = [
+    #{
+        #'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        #'DIRS': [],
+        #'APP_DIRS': True,
+        #'OPTIONS': {
+            #'context_processors': [
+                #'django.template.context_processors.request',
+                #'django.contrib.auth.context_processors.auth',
+                #'django.contrib.messages.context_processors.messages',
+            #],
+        #},
+    #},
+#]
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

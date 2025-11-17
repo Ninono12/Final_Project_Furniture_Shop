@@ -95,7 +95,7 @@ class Cart(models.Model):
     @property
     def items(self):
         if self.items_cache is None:
-            self.items_cache = self.cartitem_set.all()
+            self.items_cache = self.cart_items.all()
         return self.items_cache
 
     def get_total_price(self):
@@ -112,7 +112,7 @@ class Cart(models.Model):
         return f"Cart of {self.user}"
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
@@ -150,22 +150,19 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(args, kwargs)
-        self.items = None
-        self.id = None
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         if not self.order_number:
             self.order_number = _generate_order_number()
         super().save(*args, **kwargs)
 
+        items = self.items.all()
+
         total = Decimal('0.00')
-        items = getattr(self, 'items', None)
-        if items is None:
-            items = self.items.all()
-        for item in items.all():
-            total += (item.price or Decimal('0.00')) * item.quantity
+        for item in items:
+            total += item.price * item.quantity
 
         if self.total_amount != total:
             self.total_amount = total
