@@ -1,66 +1,73 @@
-Final Project - Furniture Shop
+### Final Project - Furniture Shop
 
-Installation & Setup
+## Installation & Setup
 
-Clone the repository:
-
+### Clone the repository:
 git clone https://github.com/Ninono12/Final_Project_Furniture_Shop.git
 cd Final_Project_Furniture_Shop
 
-Create and activate a virtual environment:
+### Create and activate a virtual environment:
 python -m venv venv
+venv\Scripts\activate  
 
-venv\Scripts\activate
-
-Install dependencies:
+### Install dependencies:
 pip install -r requirements.txt
 
-Apply migrations:
+### Apply migrations:
 python manage.py migrate
 
-Create a superuser:
+### Create a superuser:
 python manage.py createsuperuser
 
-Run the development server:
+### Run the development server:
 python manage.py runserver
 
-Project Structure:
-catalog/ – models, serializers, views, urls, tasks, tests, apps, admin
-config/ - celery, settings, urls, asgi, wsgi
-media/ – uploaded media files; 
-users/ - admin, apps, models, serializers, tests, urls, views
-static/ – #static assets (CSS, JS, images)
-templates/ - #
-venv/ - #
+## Project Structure
+catalog/ – models, serializers, views, urls, tasks, tests, apps, admin  
+config/ – celery, settings, urls, asgi, wsgi  
+media/ – uploaded media files  
+users/ – admin, apps, models, serializers, tests, urls, views  
+static/ – style.css (minimal static file for structure)  
+templates/ – products.html (minimal template for structure)  
+venv/ – virtual environment files (include, lib, scripts)  
 db.sqlite3 – prefilled with test data
 
-Authentication:
-JWT authentication via DRF Simple JWT
-API Endpoints
-/api/register/ – Register a new user
-/api/login/ – Login and obtain JWT tokens
+**Note:** Frontend is minimal; templates and static folders exist for project structure only.
 
-Celery Tasks:
+## Authentication
+JWT authentication via DRF Simple JWT
+
+## API Endpoints:
+- /api/register/ – Register a new user  
+- /api/login/ – Login and obtain JWT tokens
+
+## Celery Tasks
 Periodic tasks (e.g., order notifications) are handled via Celery & Redis.
-Start the Celery worker:
+
+### Start the Celery worker:
 celery -A Final_Project_Furniture_Shop worker -l info
 
-Start Celery Beat for periodic tasks:
+### Start Celery Beat for periodic tasks:
 celery -A Final_Project_Furniture_Shop beat -l info
 
-Collect static files:
+## Static & Media Files
+Media uploads are stored in the media/ folder  
+Static files are served from the static/ folder
+
+### Collect static files:
 python manage.py collectstatic
 
-Create additional test data or populate the database:
+## Test Data
+Test data is already included in db.sqlite3.  
+To create additional test data or populate the database:  
 python manage.py loaddata initial_data.json
 
-Contact
-
+## Contact
 For issues or questions, contact the project author via GitHub: Ninono12
 
+## Notes
+- Ensure Redis server is running before starting Celery.  
+- Frontend (templates & CSS) is minimal and included for project structure.  
+- Test data is preloaded in db.sqlite3.  
+- Media uploads are stored in the media/ folder.
 
-#Notes:
-Ensure Redis server is running before starting Celery.
-Test data is already included in db.sqlite3.
-Media uploads are stored in the media/ folder.
-Static files are served from the static/ folder.
