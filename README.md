@@ -1,6 +1,6 @@
-# Final Project - Furniture Shop
+Final Project - Furniture Shop
 
-## Installation & Setup
+Installation & Setup
 
 Clone the repository:
 
@@ -9,7 +9,7 @@ cd Final_Project_Furniture_Shop
 
 Create and activate a virtual environment:
 python -m venv venv
-# Windows
+
 venv\Scripts\activate
 
 Install dependencies:
@@ -49,10 +49,10 @@ Start Celery Beat for periodic tasks:
 celery -A Final_Project_Furniture_Shop beat -l info
 
 Collect static files:
-python manage.py collect static
+python manage.py collectstatic
 
 Create additional test data or populate the database:
-python manage.py load data initial_data.json
+python manage.py loaddata initial_data.json
 
 Contact
 
