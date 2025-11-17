@@ -34,6 +34,7 @@ urlpatterns = [
     path('cart/add/', CartAddItemView.as_view(), name='cart-add'),
     path('cart/remove/', CartRemoveItemView.as_view(), name='cart-remove'),
     path('api/', include('catalog.urls')),
+    path("api/", include("users.urls")),
 ]
 
 if settings.DEBUG:
