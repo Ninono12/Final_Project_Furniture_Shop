@@ -38,8 +38,15 @@ db.sqlite3 – prefilled with test data
 JWT authentication via DRF Simple JWT
 
 ## API Endpoints:
-- /api/register/ – Register a new user  
-- /api/login/ – Login and obtain JWT tokens
+POST /api/register/ – Register a new user
+POST /api/login/ – Login and obtain JWT
+GET /api/cart/ – View cart
+POST /api/cart/add/ – Add product to cart
+POST /api/cart/remove/ – Remove product from cart
+GET /api/orders/ – List of my orders
+GET /api/orders/<id>/ – Order details
+POST /api/orders/create/ – Create a new order
+
 
 ## Celery Tasks
 Periodic tasks (e.g., order notifications) are handled via Celery & Redis.
@@ -67,7 +74,7 @@ For issues or questions, contact the project author via GitHub: Ninono12
 
 ## Notes
 - Ensure Redis server is running before starting Celery.  
-- Frontend (templates & CSS) is minimal and included for project structure.  
+- Front-End (templates & CSS) is minimal and emplates and static folders exist for project structure only.  
 - Test data is preloaded in db.sqlite3.  
 - Media uploads are stored in the media/ folder.
 
