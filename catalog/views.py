@@ -8,10 +8,13 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.shortcuts import render
-
 from users.serializers import RegisterSerializer
-
-User = get_user_model()
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.generics import ListAPIView
+from .serializers import CategorySerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
 from .serializers import (
@@ -73,16 +76,33 @@ class ProductDetailView(generics.RetrieveAPIView):
         #return Response({'refresh': str(refresh), 'access': str(refresh.access_token)}, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         from django.contrib.auth import authenticate
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-        if not user:
-            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        refresh = RefreshToken.for_user(user)
-        return Response({'refresh': str(refresh), 'access': str(refresh.access_token)})
 
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # If user logs in with email, convert it to username
+        if email and not username:
+            try:
+                user_obj = User.objects.get(email=email)
+                username = user_obj.username
+            except User.DoesNotExist:
+                return Response({'detail': 'Invalid credentials'}, status=401)
+
+        user = authenticate(username=username, password=password)
+
+        if not user:
+            return Response({'detail': 'Invalid credentials'}, status=401)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        })
 class CartView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CartSerializer
@@ -173,7 +193,6 @@ class OrderCreateView(APIView):
 
         cart.items.all().delete()
 
-
         send_order_confirmation_email.delay(order.id)
 
         return Response({
@@ -198,3 +217,11 @@ class RegisterAPIView(generics.CreateAPIView):
 
 def home(request):
     return render(request, 'products.html')
+
+class CategoryPagination(PageNumberPagination):
+    page_size = 2
+
+class CategoryListAPIView(ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    pagination_class = CategoryPagination

@@ -4,8 +4,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, UserSerializer, CustomUserProfileSerializer, ChangePasswordSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from django.contrib.auth import get_user_model, authenticate
 
 User = get_user_model()
+
 
 
 class RegisterAPIView(generics.CreateAPIView):
@@ -62,3 +67,32 @@ class UserDetailAPIView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get("username")
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        # თუ email-ის მიხედვით შედის
+        if email and not username:
+            try:
+                user_obj = User.objects.get(email=email)
+                username = user_obj.username   # authenticate username-ს მოითხოვს
+            except User.DoesNotExist:
+                return Response({"detail": "Invalid credentials"}, status=401)
+
+        user = authenticate(username=username, password=password)
+
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=401)
+
+        # JWT Tokens
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
+        })

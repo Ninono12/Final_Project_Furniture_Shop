@@ -16,6 +16,7 @@ from .views import (
     RegisterAPIView, LoginView,
 )
 
+from .views import CategoryListAPIView
 from .views import home
 #router = DefaultRouter()
 #router.register('products', ProductViewSet, basename='product')
@@ -34,5 +35,5 @@ urlpatterns = [
     path('orders/', OrderListView.as_view(), name='order-list'),
     path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
     path('orders/create/', OrderCreateView.as_view(), name='order-create'),
-    path('', home, name='home'),
+       path('', home, name='home'),
 ]
