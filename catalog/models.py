@@ -88,19 +88,12 @@ class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.items_cache = None
-
     @property
     def items(self):
-        if self.items_cache is None:
-            self.items_cache = self.cart_items.all()
-        return self.items_cache
+        return self.cart_items.all()
 
     def get_total_price(self):
-        total = sum((item.product.price or Decimal('0.00')) * item.quantity for item in self.items)
-        return total
+        return sum(item.product.price * item.quantity for item in self.items)
 
     def get_total_items(self):
         return self.items
@@ -150,23 +143,17 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def save(self, *args, **kwargs):
+        # შექმნისას order_number ივსება
         if not self.order_number:
             self.order_number = _generate_order_number()
-        super().save(*args, **kwargs)
-
-        items = self.items.all()
 
         total = Decimal('0.00')
-        for item in items:
+        for item in self.items.all():
             total += item.price * item.quantity
+        self.total_amount = total
 
-        if self.total_amount != total:
-            self.total_amount = total
-            super().save(update_fields=['total_amount'])
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Order {self.order_number} - {self.user}"

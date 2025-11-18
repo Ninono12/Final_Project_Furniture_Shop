@@ -11,12 +11,14 @@ from .views import (
     CategoryListView, CategoryDetailView,
     ProductListView, ProductDetailView,
     CartView, CartAddItemView, CartRemoveItemView,
-    ProductViewSet, RegisterAPIView, LoginView, #LoginAPIView,
-    OrderListView, OrderDetailView, OrderCreateView
+    #ProductViewSet,  LoginAPIView,
+    OrderListView, OrderDetailView, OrderCreateView,
+    RegisterAPIView, LoginView,
 )
 
-router = DefaultRouter()
-router.register(r'products', ProductViewSet, basename='product')
+from .views import home
+#router = DefaultRouter()
+#router.register('products', ProductViewSet, basename='product')
 
 urlpatterns = [
     path('categories/', CategoryListView.as_view(), name='category-list'),
@@ -32,4 +34,5 @@ urlpatterns = [
     path('orders/', OrderListView.as_view(), name='order-list'),
     path('orders/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
     path('orders/create/', OrderCreateView.as_view(), name='order-create'),
+    path('', home, name='home'),
 ]

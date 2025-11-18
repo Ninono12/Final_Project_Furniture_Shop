@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.shortcuts import render
 
 from users.serializers import RegisterSerializer
 
@@ -52,11 +53,11 @@ class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.filter(is_available=True)
     serializer_class = ProductSerializer
 
-class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Product.objects.filter(is_available=True)
-    serializer_class = ProductSerializer
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['color', 'material', 'name']
+#class ProductViewSet(viewsets.ReadOnlyModelViewSet):
+    #queryset = Product.objects.filter(is_available=True)
+    #serializer_class = ProductSerializer
+    #filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    #search_fields = ['color', 'material', 'name']
 
 #class RegisterView(APIView):
     #def post(self, request):
@@ -95,17 +96,30 @@ class CartAddItemView(APIView):
 
     def post(self, request):
         product_id = request.data.get('product_id')
-        quantity = int(request.data.get('quantity', 1))
+        quantity_raw = request.data.get('quantity', 1)
+
+        if not product_id:
+            return Response({'detail': 'product_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            quantity = int(quantity_raw)
+            if quantity < 1:
+                raise ValueError
+        except (ValueError, TypeError):
+            return Response({'detail': 'Invalid quantity'}, status=status.HTTP_400_BAD_REQUEST)
+
         cart, _ = Cart.objects.get_or_create(user=request.user)
         product = get_object_or_404(Product, pk=product_id)
+
         item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         if not created:
             item.quantity += quantity
         else:
             item.quantity = quantity
         item.save()
-        cart.items_cache = None
-        return Response({'detail': 'Item added/updated in cart'})
+
+        return Response({'detail': 'Item added/updated in cart'}, status=status.HTTP_200_OK)
+
 
 class CartRemoveItemView(APIView):
     permission_classes = [IsAuthenticated]
@@ -115,7 +129,7 @@ class CartRemoveItemView(APIView):
         cart = get_object_or_404(Cart, user=request.user)
         CartItem.objects.filter(cart=cart, product_id=product_id).delete()
         # clear cached items after deletion
-        cart.items_cache = None
+        #cart.items_cache = None
         return Response({'detail': 'Item removed from cart'})
 
 class OrderListView(generics.ListAPIView):
@@ -181,3 +195,6 @@ class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
+
+def home(request):
+    return render(request, 'products.html')

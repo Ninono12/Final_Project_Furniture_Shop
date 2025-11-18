@@ -17,29 +17,13 @@ def send_order_confirmation_email(order_id):
     except Order.DoesNotExist:
         pass
 
-@shared_task
-def update_order_status(order_id=None):
-    if order_id:
-        try:
-            order = Order.objects.get(id=order_id)
-            if order.status.lower() == 'pending':
-                order.status = 'processing'
-                order.save()
-        except Order.DoesNotExist:
-            pass
-    else:
-        pending_orders = Order.objects.filter(
-            status__iexact='pending',
-            created_at__lte=timezone.now() - timedelta(minutes=5)
-        )
-        for order in pending_orders:
-            order.status = 'processing'
-            order.save()
 
 @shared_task
 def update_order_status():
-
-    pending_orders = Order.objects.filter(status='Pending', created_at__lte=timezone.now() - timedelta(minutes=5))
+    pending_orders = Order.objects.filter(
+        status__iexact='pending',
+        created_at__lte=timezone.now() - timedelta(minutes=5)
+    )
     for order in pending_orders:
-        order.status = 'Processing'
+        order.status = 'processing'
         order.save()
