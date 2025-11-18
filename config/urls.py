@@ -33,6 +33,7 @@ urlpatterns = [
     path('cart/', CartView.as_view(), name='cart'),
     path('cart/add/', CartAddItemView.as_view(), name='cart-add'),
     path('cart/remove/', CartRemoveItemView.as_view(), name='cart-remove'),
+    path('admin/', admin.site.urls),
     path('api/', include('catalog.urls')),
     path("api/", include("users.urls")),
 ]
